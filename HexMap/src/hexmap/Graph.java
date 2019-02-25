@@ -52,6 +52,7 @@ public class Graph {
 			ringStart = getRingStart(ring);
 			ringEnd = getRingEnd(ring);
 
+			//Array of the offsets to use when joining hexes
 			int[] target = new int[5];
 			target[0] = n.getHexId() - 1;
 			target[1] = n.getHexId() + 1;
@@ -63,79 +64,68 @@ public class Graph {
 			// Joins to 1-6
 			if (type == 0 && size > 1) {
 				for (int i = 1; i <= 6; i++) {
-					n.addEdge(i, size);
-					dest = this.nodeList.get(i);
-					dest.addEdge(0, size);
+					joinNode(n, i, size);
 				}
 
-				// 1 is CORNER type
-				// Increments the offset
+			// 1 is CORNER type
+			// Increments the offset
 			} else if (type == 1) {
 				if (n.getHexId() > ringStart && n.getHexId() < ringEnd) {
 					for (int i = 0; i < target.length; i++) {
 						if (target[i] < size) {
-							n.addEdge(target[i], size);
-							dest = this.nodeList.get(target[i]);
-							dest.addEdge(n.getHexId(), size);
+							joinNode(n, target[i], size);
 						}
-
 					}
 					offset++;
 
+				//joins first and last node of ring
 				} else if (n.getHexId() == ringStart) {
-					n.addEdge(ringEnd, size);
-					dest = this.nodeList.get(ringEnd);
-					dest.addEdge(ringStart, size);
+					joinNode(n, ringEnd, size);
 					for (int i = 1; i < target.length; i++) {
 						if (target[i] < size) {
-							n.addEdge(target[i], size);
-							dest = this.nodeList.get(target[i]);
-							dest.addEdge(n.getHexId(), size);
+							joinNode(n, target[i], size);
 						}
-
 					}
 					offset++;
 
+				//joins end of ring to next ring
 				} else if (n.getHexId() == ringEnd) {
 					for (int i = 0; i < target.length - 1; i++) {
 						if (target[i] < size) {
-							n.addEdge(target[i], size);
-							dest = this.nodeList.get(target[i]);
-							dest.addEdge(n.getHexId(), size);
+							joinNode(n, target[i], size);
 						}
-
 					}
 					offset++;
 				}
 
-				// 2 is EDGE type
-				// Does not increment offset
+			// 2 is EDGE type
+			// Does not increment offset
 			} else if (type == 2) {
 				if (n.getHexId() > ringStart && n.getHexId() < ringEnd) {
 					for (int i = 0; i < target.length - 1; i++) {
 						if (target[i] < size) {
-							n.addEdge(target[i], size);
-							dest = this.nodeList.get(target[i]);
-							dest.addEdge(n.getHexId(), size);
+							joinNode(n, target[i], size);
 						}
-
 					}
 
+				//joins first of ring to end of ring
 				} else if (n.getHexId() == ringStart) {
-					n.addEdge(ringEnd, size);
-					dest = this.nodeList.get(ringEnd);
-					dest.addEdge(ringStart, size);
+					joinNode(n, ringEnd, size);
 
 					for (int i = 0; i < target.length - 1; i++) {
 						if (target[i] < size) {
-							n.addEdge(target[i], size);
-							dest = this.nodeList.get(target[i]);
-							dest.addEdge(n.getHexId(), size);
+							joinNode(n, target[i], size);
 						}
 					}
 				}
 			}
 		}
+	}
+	
+	public void joinNode(Node src, int target, int size) {
+		src.addEdge(target, size);
+		Node dest = this.nodeList.get(target);
+		dest.addEdge(src.getHexId(), size);
 	}
 
 	public int getRingStart(int ring) {
