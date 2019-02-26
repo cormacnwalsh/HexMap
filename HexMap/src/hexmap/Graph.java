@@ -4,6 +4,7 @@ import java.util.*;
 
 public class Graph {
 	private int radius;
+	private int size;
 	private ArrayList<Node> nodeList = new ArrayList<>();
 
 	// Constructor
@@ -14,7 +15,7 @@ public class Graph {
 		addNode();
 
 		// determines the edges between nodes
-		int size = this.nodeList.size();
+		size = this.nodeList.size();
 		determineAdjacency(size);
 	}
 
@@ -29,12 +30,12 @@ public class Graph {
 		nodeList.add(root);
 
 		// adds all other nodes to nodeList
-		for (int i = 1; i <= this.radius; i++) { //The ring loop
+		for (int i = 1; i <= this.radius; i++) { // The ring loop
 			int ringSize = i * 6;
 			for (int j = 1; j <= ringSize; j++) { // The node loop
 				id++;
-				ring = i; //sets ring
-				type = determineType(id, ring); //sets type: CENTER, CORNER, EDGE
+				ring = i; // sets ring
+				type = determineType(id, ring); // sets type: CENTER, CORNER, EDGE
 				Node n = new Node(type, id, ring, calcCost(ring));
 				nodeList.add(n);
 			}
@@ -42,7 +43,6 @@ public class Graph {
 	}
 
 	public void determineAdjacency(int size) {
-		Node dest;
 		int ring, ringStart, ringEnd, type;
 		int offset = 6;
 
@@ -52,7 +52,7 @@ public class Graph {
 			ringStart = getRingStart(ring);
 			ringEnd = getRingEnd(ring);
 
-			//Array of the offsets to use when joining hexes
+			// Array of the offsets to use when joining hexes
 			int[] target = new int[5];
 			target[0] = n.getHexId() - 1;
 			target[1] = n.getHexId() + 1;
@@ -67,8 +67,8 @@ public class Graph {
 					joinNode(n, i, size);
 				}
 
-			// 1 is CORNER type
-			// Increments the offset
+				// 1 is CORNER type
+				// Increments the offset
 			} else if (type == 1) {
 				if (n.getHexId() > ringStart && n.getHexId() < ringEnd) {
 					for (int i = 0; i < target.length; i++) {
@@ -78,7 +78,7 @@ public class Graph {
 					}
 					offset++;
 
-				//joins first and last node of ring
+					// joins first and last node of ring
 				} else if (n.getHexId() == ringStart) {
 					joinNode(n, ringEnd, size);
 					for (int i = 1; i < target.length; i++) {
@@ -88,7 +88,7 @@ public class Graph {
 					}
 					offset++;
 
-				//joins end of ring to next ring
+					// joins end of ring to next ring
 				} else if (n.getHexId() == ringEnd) {
 					for (int i = 0; i < target.length - 1; i++) {
 						if (target[i] < size) {
@@ -98,8 +98,8 @@ public class Graph {
 					offset++;
 				}
 
-			// 2 is EDGE type
-			// Does not increment offset
+				// 2 is EDGE type
+				// Does not increment offset
 			} else if (type == 2) {
 				if (n.getHexId() > ringStart && n.getHexId() < ringEnd) {
 					for (int i = 0; i < target.length - 1; i++) {
@@ -108,7 +108,7 @@ public class Graph {
 						}
 					}
 
-				//joins first of ring to end of ring
+					// joins first of ring to end of ring
 				} else if (n.getHexId() == ringStart) {
 					joinNode(n, ringEnd, size);
 
@@ -121,7 +121,7 @@ public class Graph {
 			}
 		}
 	}
-	
+
 	public void joinNode(Node src, int target, int size) {
 		src.addEdge(target, size);
 		Node dest = this.nodeList.get(target);
@@ -149,7 +149,24 @@ public class Graph {
 			return 1; // corner type
 		} else {
 			return 2; // edge type
-		}
+		} // CENTER type predefined for 0, so no need for it here
+	}
+
+	// prints BFS traversal from a given source s
+	public void BFS(int s, int d) {
+		Node src = this.nodeList.get(s);
+		Node dest = this.nodeList.get(d);
+		
+		ArrayList<Node> visited = new ArrayList<>();
+		
+		int stops = 0;
+		int cost = 0;
+		
+		do {
+			
+			
+			
+		}while(visited.size() < this.size);
 	}
 
 	public void printGraph() {
@@ -232,3 +249,69 @@ public class Graph {
 		}
 	}
 }
+
+// public List<Integer> getPath(int goal) {
+// List<Integer> path = new ArrayList<Integer>();
+// for(Node node = this.nodeList.get(goal); node!=null; node = node.parent){
+// path.add(node.getHexId());
+// }
+//
+// Collections.reverse(path);
+//
+// return path;
+// }
+//
+// public PriorityQueue<Node> ucs(int src, int dest) {
+// Node n = this.nodeList.get(src);
+// n.pathCost = 0;
+// boolean found = false;
+//
+// PriorityQueue<Node> frontier = new PriorityQueue<Node>(
+// new Comparator<Node>() {
+// //override compare method
+// public int compare(Node a, Node b) {
+// if(a.getHexCost() > b.getHexCost()) {
+// return 1;
+// }else if(a.getPathCost() < b.getPathCost()) {
+// return -1;
+// }else {
+// return 0;
+// }
+// }
+// });
+//
+// frontier.add(n);
+// HashSet<Node> explored = new HashSet<>();
+//
+// do {
+// n = frontier.poll();
+// explored.add(n);
+//
+// if(n.getHexId() == this.nodeList.get(dest).getHexId()) {
+// found = true;
+// }
+//
+// for(int i : n.getAdjList()){
+// Node child = this.nodeList.get(i);
+// int cost = child.getHexCost();
+//
+// //add node to frontier if not explored
+// if(!explored.contains(child) && !frontier.contains(child)) {
+// child.pathCost = n.pathCost + cost;
+// child.setParent(n);
+// frontier.add(child);
+//
+// //if current path is lower in cost than previous path
+// }else if(frontier.contains(child) && (child.pathCost > (n.pathCost + cost)))
+// {
+// child.setParent(n);
+// child.pathCost = n.pathCost + cost;
+// frontier.remove(child);
+// frontier.add(child);
+// }
+// }
+//
+// }while(!frontier.isEmpty() && found == false);
+//
+// return frontier;
+// }
