@@ -9,11 +9,19 @@ public class HexMap {
 		Graph hexMap = new Graph(hexRadius);
 
 		hexMap.printGraph();
-		
-		hexMap.ucs(1, 12);
-		
-		List<Integer> path = hexMap.getPath(12);
-		
+
+		Scanner input = new Scanner(System.in);
+
+		System.out.println("Enter starting hex: ");
+		int start = input.nextInt();
+
+		System.out.println("Enter goal hex: ");
+		int end = input.nextInt();
+
+		hexMap.setPath(start, end);
+
+		List<Integer> path = hexMap.getPath(end);
+
 		System.out.println("Path: " + path);
 	}
 }

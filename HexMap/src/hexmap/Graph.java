@@ -141,7 +141,7 @@ public class Graph {
 
 	public int calcCost(int ring) {
 		// the cost is inverse to distance from the center node
-		return (this.radius + 1) - ring;
+		return (this.radius + 100) - ring;
 	}
 
 	public int determineType(int id, int ring) {
@@ -163,50 +163,52 @@ public class Graph {
 		return path;
 	}
 
-	public void ucs(int src, int dest) {
+	public void setPath(int src, int dest) {
 		Node start = this.nodeList.get(src);
-		start.pathCost = 0;
-		boolean found = false;
 
-		PriorityQueue<Node> frontier = new PriorityQueue<Node>(new Comparator<Node>() {
-			// override compare method
-			public int compare(Node a, Node b) {
-				if (a.getHexCost() > b.getHexCost()) {
-					return 1;
-				} else if (a.getHexCost() < b.getHexCost()) {
-					return -1;
-				} else {
-					return 0;
-				}
-			}
-		});
+		start.pathCost = 0;
+
+		PriorityQueue<Node> frontier = new PriorityQueue<>(
+				new Comparator<Node>() {
+					public int compare(Node a, Node b) {
+						if(a.pathCost > b.pathCost) {
+							return 1;
+						}else if(a.pathCost < b.pathCost) {
+							return -1;
+						}else {
+							return 0;
+						}
+					}
+				});
+		HashSet<Node> visited = new HashSet<>();
 
 		frontier.add(start);
-		HashSet<Node> explored = new HashSet<>();
 
 		do {
 			Node n = frontier.poll();
-			explored.add(n);
+			visited.add(n);
 
-			for (int i : n.getAdjList()) {
+			if(n.getHexId() == dest) {
+				break;
+			}
+
+			for(int i : n.getAdjList()) {
 				Node child = this.nodeList.get(i);
-				int cost = child.getHexCost() + 1;
+				int cost = child.hexCost;
 
-				// add node to frontier if not explored
-				if (!explored.contains(child) && !frontier.contains(child)) {
-					child.pathCost = n.pathCost + cost;
+				if(!visited.contains(child) && !frontier.contains(child)) {
 					child.parent = n;
+					child.pathCost += n.pathCost + cost;
 					frontier.add(child);
 
-				// if current path is lower in cost than previous path
-				} else if (frontier.contains(child) && (child.pathCost > (n.pathCost + cost))) {
+				}else if(frontier.contains(child) && child.pathCost < n.pathCost) {
 					child.parent = n;
 					child.pathCost = n.pathCost + cost;
 					frontier.remove(child);
+					frontier.add(child);
 				}
 			}
-
-		} while (!frontier.isEmpty());
+		}while(!frontier.isEmpty());
 	}
 
 	public void printGraph() {
@@ -245,7 +247,7 @@ public class Graph {
 		private int hexId;
 		private int hexRing;
 		private int hexCost;
-		
+
 		private int pathCost;
 		private Node parent;
 
