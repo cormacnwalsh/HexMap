@@ -5,7 +5,7 @@ import java.util.*;
 public class Graph {
 	private int radius;
 	private int size;
-	public static ArrayList<Node> nodeList = new ArrayList<>();
+	private ArrayList<Node> nodeList = new ArrayList<>();
 
 	// Constructor
 	public Graph(int r) {
@@ -152,6 +152,63 @@ public class Graph {
 		} // CENTER type predefined for 0, so no need for it here
 	}
 
+	public ArrayList<Integer> getPath(int goal) {
+		ArrayList<Integer> path = new ArrayList<Integer>();
+		for (Node node = this.nodeList.get(goal); node != null; node = node.parent) {
+			path.add(node.getHexId());
+		}
+
+		Collections.reverse(path);
+
+		return path;
+	}
+
+	public void ucs(int src, int dest) {
+		Node start = this.nodeList.get(src);
+		start.pathCost = 0;
+		boolean found = false;
+
+		PriorityQueue<Node> frontier = new PriorityQueue<Node>(new Comparator<Node>() {
+			// override compare method
+			public int compare(Node a, Node b) {
+				if (a.getHexCost() > b.getHexCost()) {
+					return 1;
+				} else if (a.getHexCost() < b.getHexCost()) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+
+		frontier.add(start);
+		HashSet<Node> explored = new HashSet<>();
+
+		do {
+			Node n = frontier.poll();
+			explored.add(n);
+
+			for (int i : n.getAdjList()) {
+				Node child = this.nodeList.get(i);
+				int cost = child.getHexCost() + 1;
+
+				// add node to frontier if not explored
+				if (!explored.contains(child) && !frontier.contains(child)) {
+					child.pathCost = n.pathCost + cost;
+					child.parent = n;
+					frontier.add(child);
+
+				// if current path is lower in cost than previous path
+				} else if (frontier.contains(child) && (child.pathCost > (n.pathCost + cost))) {
+					child.parent = n;
+					child.pathCost = n.pathCost + cost;
+					frontier.remove(child);
+				}
+			}
+
+		} while (!frontier.isEmpty());
+	}
+
 	public void printGraph() {
 		for (Node n : nodeList) {
 			int type = n.getHexType();
@@ -180,6 +237,58 @@ public class Graph {
 				System.out.print(i + ", ");
 			}
 			System.out.println("\n");
+		}
+	}
+
+	public class Node {
+		private int hexType; // center = 0; corner = 1; edge = 2;
+		private int hexId;
+		private int hexRing;
+		private int hexCost;
+		
+		private int pathCost;
+		private Node parent;
+
+		// The list of adjacent Nodes
+		private LinkedList<Integer> adjList;
+
+		// Constructor
+		public Node(int type, int id, int ring, int cost) {
+			this.hexType = type;
+			this.hexId = id;
+			this.hexRing = ring;
+			this.hexCost = cost;
+
+			adjList = new LinkedList<>();
+		}
+
+		public int getHexType() {
+			return hexType;
+		}
+
+		public int getHexId() {
+			return hexId;
+		}
+
+		public int getHexRing() {
+			return hexRing;
+		}
+
+		public int getHexCost() {
+			return hexCost;
+		}
+
+		public LinkedList<Integer> getAdjList() {
+			return adjList;
+		}
+
+		// add edge to undirected graph
+		public void addEdge(int dest, int maxSize) {
+			// src -> dest
+			if (adjList.size() < 6 && dest < maxSize && !adjList.contains(dest)) {
+				this.adjList.add(dest);
+				Collections.sort(adjList);
+			}
 		}
 	}
 }
