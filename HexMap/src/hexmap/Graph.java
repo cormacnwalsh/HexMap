@@ -141,7 +141,7 @@ public class Graph {
 
 	public int calcCost(int ring) {
 		// the cost is inverse to distance from the center node
-		return (this.radius + 100) - ring;
+		return (this.radius) - ring + 101;
 	}
 
 	public int determineType(int id, int ring) {
@@ -156,6 +156,13 @@ public class Graph {
 		ArrayList<Integer> path = new ArrayList<Integer>();
 		for (Node node = this.nodeList.get(goal); node != null; node = node.parent) {
 			path.add(node.getHexId());
+		}
+		
+		//loop reset all parents and costs to nothing
+		//needed to generate additional paths
+		for(Node node : this.nodeList) {
+			node.parent = null;
+			node.pathCost = 0;
 		}
 
 		Collections.reverse(path);
